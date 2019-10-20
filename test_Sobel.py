@@ -8,7 +8,8 @@ def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0, 255)):
     # Calculate directional gradient
     # Apply threshold
     # 1) Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    gray = hsv[:,:,2]
     # 2) Take the derivative in x or y given orient = 'x' or 'y'
     sobel = cv2.Sobel(gray, cv2.CV_64F, orient == 'x', orient == 'y')
     # 3) Take the absolute value of the derivative or gradient
@@ -26,7 +27,8 @@ def mag_thresh(image, sobel_kernel=3, mag_thresh=(0, 255)):
     # Calculate gradient magnitude
     # Apply threshold
      # 1) Convert to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    gray = hsv[:,:,2]
     # 2) Take the gradient in x and y separately
     sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
     sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
@@ -44,7 +46,8 @@ def dir_threshold(image, sobel_kernel=3, thresh=(0, np.pi/2)):
     # Calculate gradient direction
     # Apply threshold
     # 1) Convert to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    gray = hsv[:,:,2]
     # 2) Take the gradient in x and y separately
     xSobel = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
     ySobel = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
