@@ -77,8 +77,8 @@ xsize = image.shape[1]
 ysize = image.shape[0]
 
 # Thresholds
-lower_s_threshold = 150
-upper_s_threshold = 250
+lower_s_threshold = 180
+upper_s_threshold = 255
 lower_h_threshold = 22
 upper_h_threshold = 25
 
