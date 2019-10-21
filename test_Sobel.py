@@ -67,10 +67,10 @@ image = mpimg.imread("test_images/straight_lines1.jpg")
 ksize = 1 # Choose a larger odd number to smooth gradient measurements
 
 # Apply each of the thresholding functions
-gradx = abs_sobel_thresh(image, orient='x', sobel_kernel=ksize, thresh=(45, 100)) #20, 50
-grady = abs_sobel_thresh(image, orient='y', sobel_kernel=ksize, thresh=(45, 100)) #20, 50
-mag_binary = mag_thresh(image, sobel_kernel=ksize, mag_thresh=(60, 85))
-dir_binary = dir_threshold(image, sobel_kernel=ksize, thresh=(np.pi/4, np.pi/3))
+gradx = abs_sobel_thresh(image, orient='x', sobel_kernel=ksize, thresh=(25, 100)) #20, 50
+grady = abs_sobel_thresh(image, orient='y', sobel_kernel=ksize, thresh=(25, 100)) #20, 50
+mag_binary = mag_thresh(image, sobel_kernel=ksize, mag_thresh=(35, 85))
+dir_binary = dir_threshold(image, sobel_kernel=ksize, thresh=(np.pi/4, 4*np.pi/10))
 
 # Image size
 xsize = image.shape[1]
