@@ -64,7 +64,7 @@ def dir_threshold(image, sobel_kernel=3, thresh=(0, np.pi/2)):
 image = mpimg.imread("test_images/straight_lines1.jpg")
 
 # Choose a Sobel kernel size
-ksize = 7 # Choose a larger odd number to smooth gradient measurements
+ksize = 1 # Choose a larger odd number to smooth gradient measurements
 
 # Apply each of the thresholding functions
 gradx = abs_sobel_thresh(image, orient='x', sobel_kernel=ksize, thresh=(45, 100)) #20, 50
