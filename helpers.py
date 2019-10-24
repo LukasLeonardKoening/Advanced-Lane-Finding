@@ -61,3 +61,105 @@ def undistortImage(image, o_points, i_points):
     else:
         # raise error if camera calibration fails
         raise ValueError("Can not undistort the given image!")
+
+def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0, 255)):
+    """
+    Function calculates the directional gradient and applies given thresholds as binary mask
+    INPUT:  img = RGB image
+            orient = 'x' or 'y'
+            sobel_kernel = Sobel kernel size, odd positive number
+            threshold = Tuple of lower and upper threshold
+    OUTPUT: binary image
+    """
+    # 1) Pick the value channel from HSV convertion
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    v = hsv[:,:,2]
+    # 2) Take the derivative in given orientation = 'x' or 'y'
+    sobel = cv2.Sobel(v, cv2.CV_64F, orient == 'x', orient == 'y')
+    # 3) Take the absolute value of the derivative of gradient
+    absSobel = np.absolute(sobel)
+    # 4) Scale to 8-bit (0 - 255) and convert to type = np.uint8
+    uint8_sobel = np.uint8(255*absSobel/np.max(absSobel))
+    # 5) Create a binary mask
+    grad_binary = np.zeros_like(uint8_sobel)
+    grad_binary[(uint8_sobel > thresh[0]) & (uint8_sobel < thresh[1])] = 1
+
+    return grad_binary
+
+def mag_thresh(image, sobel_kernel=3, mag_thresh=(0, 255)):
+    """
+    Function calculates the gradient magnitude and applies given thresholds as binary mask
+    INPUT:  img = RGB image
+            sobel_kernel = Sobel kernel size, odd positive number
+            threshold = Tuple of lower and upper threshold
+    OUTPUT: binary image
+    """
+    # 1) Pick the value channel from HSV convertion
+    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    v = hsv[:,:,2]
+    # 2) Take the gradient in x and y separately
+    sobelx = cv2.Sobel(v, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
+    sobely = cv2.Sobel(v, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
+    # 3) Calculate the magnitude 
+    magnitude = np.sqrt(sobelx ** 2 + sobely ** 2)
+    # 4) Scale to 8-bit (0 - 255) and convert to type = np.uint8
+    scaled = np.uint8(255 * magnitude / np.max(magnitude))
+    # 5) Create a binary mask where mag thresholds are met
+    mag_binary = np.zeros_like(scaled)
+    mag_binary[(scaled > mag_thresh[0]) & (scaled < mag_thresh[1])] = 1
+    return mag_binary
+
+def dir_threshold(image, sobel_kernel=3, thresh=(0, np.pi/2)):
+    """
+    Function calculates the gradient direction and applies given thresholds as binary mask
+    INPUT:  img = RGB image
+            sobel_kernel = Sobel kernel size, odd positive number
+            threshold = Tuple of lower and upper threshold
+    OUTPUT: binary image
+    """
+    # 1) Pick the value channel from HSV convertion
+    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    v = hsv[:,:,2]
+    # 2) Take the gradient in x and y separately
+    xSobel = cv2.Sobel(v, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
+    ySobel = cv2.Sobel(v, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
+    # 3) Take the absolute value of the x and y gradients
+    x_abs = np.absolute(xSobel)
+    y_abs = np.absolute(ySobel)
+    # 4) Use np.arctan2(abs_sobely, abs_sobelx) to calculate the direction of the gradient 
+    direction = np.arctan2(y_abs, x_abs)
+    # 5) Create a binary mask where direction thresholds are met
+    dir_binary = np.zeros_like(direction)
+    dir_binary[(direction > thresh[0]) & (direction < thresh[1])] = 1
+    return dir_binary
+
+def create_thresholded_binary_image(rgb_image):
+    """
+    Function takes in an RGB image and returns an thresholded binary image with the lane lines 
+    """
+    # Thresholds
+    lower_s_threshold = 180
+    upper_s_threshold = 255
+
+    # Color conversions
+    hls = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2HLS)
+    s_hls = hls[:,:,2]
+
+    # Color thresholds
+    color_based_threshold = (s_hls > lower_s_threshold) & (s_hls <= upper_s_threshold)
+
+    # Sobel thresholds
+    ksize = 1 # Sobel kernel size
+
+    gradx = abs_sobel_thresh(rgb_image, orient='x', sobel_kernel=ksize, thresh=(25, 100)) #20, 50
+    grady = abs_sobel_thresh(rgb_image, orient='y', sobel_kernel=ksize, thresh=(25, 100)) #20, 50
+    mag_binary = mag_thresh(rgb_image, sobel_kernel=ksize, mag_thresh=(35, 85))
+    dir_binary = dir_threshold(rgb_image, sobel_kernel=ksize, thresh=(np.pi/4, 4*np.pi/10)) # np.pi/4, np.pi/3
+
+    sobel_based_threshold = ((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))
+
+    # Binary image creation
+    binary = np.zeros_like(s_hls)
+    binary[(color_based_threshold | sobel_based_threshold)] = 1
+
+    return binary
