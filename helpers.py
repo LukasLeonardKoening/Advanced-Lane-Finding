@@ -186,3 +186,196 @@ def transform_road(binary_image):
     warped = cv2.warpPerspective(binary_image, M, (xsize, ysize), flags=cv2.INTER_LINEAR)
 
     return warped, Minv
+
+def find_lane_line_pixels(trans_img, left_line, right_line):
+    # Image size
+    xsize = trans_img.shape[1]
+    ysize = trans_img.shape[0]
+
+    # Create an output image
+    out_img = np.dstack((trans_img, trans_img, trans_img))
+
+    # Calculate initial left and right x
+    part_of_image = trans_img[int(trans_img.shape[0]//2):, :]
+    histogram = np.sum(part_of_image, axis=0)
+
+    middle = np.int(histogram.shape[0]/2)
+    init_leftx = np.argmax(histogram[:middle])
+    init_rightx = np.argmax(histogram[middle:]) + middle
+
+    # Parameters
+    n_window = 10
+    window_height = np.int(ysize / n_window)
+    margin = 100 # margin for window size
+    minpx = 50 # minimal ammount of changed pixels
+
+    # Nonzero pixels
+    nonzero = trans_img.nonzero()
+    nonzeroY = np.array(nonzero[0])
+    nonzeroX = np.array(nonzero[1])
+
+    # Current position
+    current_leftx = init_leftx
+    current_rightx = init_rightx
+
+    left_lane_ind = []
+    right_lane_ind = []
+
+    # Loop through windows
+    for window in range(n_window):
+        # Calculate window boundaries
+        win_y_low = ysize - ((window + 1) * window_height) # Start at bottom of image and move upwards
+        win_y_high = ysize - (window * window_height)      # Start at bottom of image and move upwards
+        win_xleft_low = current_leftx - margin
+        win_xleft_high = current_leftx + margin
+        win_xright_low = current_rightx - margin
+        win_xright_high = current_rightx + margin
+
+        # Identify nonzeros in windows
+        good_left_inds = ((nonzeroY >= win_y_low) & (nonzeroY <= win_y_high) & (nonzeroX >= win_xleft_low) & (nonzeroX <= win_xleft_high)).nonzero()[0]
+        good_right_inds = ((nonzeroY >= win_y_low) & (nonzeroY <= win_y_high) & (nonzeroX >= win_xright_low) & (nonzeroX <= win_xright_high)).nonzero()[0]
+        left_lane_ind.append(good_left_inds)
+        right_lane_ind.append(good_right_inds)
+
+        # If enough pixels identified, change current position
+        if (len(good_left_inds) >= minpx):
+            current_leftx = np.int(sum(nonzeroX[good_left_inds])/len(nonzeroX[good_left_inds]))
+        if (len(good_right_inds) >= minpx):
+            current_rightx = np.int(sum(nonzeroX[good_right_inds])/len(nonzeroX[good_right_inds]))
+
+    # Concatente arrays of indices
+    left_lane_ind = np.concatenate(left_lane_ind)
+    right_lane_ind = np.concatenate(right_lane_ind)
+
+    # Extract left and right line pixel positions
+    leftx = nonzeroX[left_lane_ind]
+    lefty = nonzeroY[left_lane_ind] 
+    rightx = nonzeroX[right_lane_ind]
+    righty = nonzeroY[right_lane_ind]
+
+    # Add pixels to line
+    left_line.allx = leftx
+    left_line.ally = lefty
+    right_line.allx = rightx
+    right_line.ally = righty
+
+    return out_img, left_line, right_line
+
+def calc_curvature(trans_img, left_line, right_line):
+    out_img, left_line_pixels, right_line_pixels = find_lane_line_pixels(trans_img, left_line, right_line)
+    leftx = left_line_pixels.allx
+    lefty = left_line_pixels.ally
+    rightx = right_line_pixels.allx
+    righty = right_line_pixels.ally
+
+    # Image dimensions
+    ysize = trans_img.shape[0]
+    xsize = trans_img.shape[1]
+
+    # Meters in pixel
+    ym_per_pix = 22/720
+    xm_per_pix = 3.7/990
+
+    # Calculate polynomial fit 
+    left_fit = np.polyfit(lefty * ym_per_pix, leftx * xm_per_pix, 2)
+    right_fit = np.polyfit(righty * ym_per_pix, rightx * xm_per_pix, 2)
+
+    if not (left_line_pixels.current_fit == [np.array([False])]):
+        left_line_pixels.recent_coeff = left_line_pixels.current_fit
+    if not (right_line_pixels.current_fit == [np.array([False])]):
+        right_line_pixels.recent_coeff = right_line_pixels.current_fit
+    left_line_pixels.current_fit = left_fit
+    right_line_pixels.current_fit = right_fit
+
+    # Generate x and y values for plotting
+    ploty = np.linspace(0, (trans_img.shape[0]-1), trans_img.shape[0])
+
+    left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
+    right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+
+    ## Visualization ##
+    # Colors in the left and right lane regions
+    out_img[lefty, leftx] = [255, 0, 0]
+    out_img[righty, rightx] = [0, 0, 255]
+
+    ## Curvature calculation
+    y_eval = np.max(ploty) * ym_per_pix # y at which radius is calculated
+
+    # Left and right lane curvature calculation
+    left_curvature = np.sqrt((1+(2*left_fit[0]*y_eval+left_fit[1])**2)**3)/np.abs(2*left_fit[0])
+    right_curvature = np.sqrt((1+(2*right_fit[0]*y_eval+right_fit[1])**2)**3)/np.abs(2*right_fit[0])
+
+    left_line_pixels.radius_of_curvature = left_curvature
+    right_line_pixels.radius_of_curvature = right_curvature
+
+    ## Position calculation
+    left_line_pixels.current_x = left_fit[0] * y_eval ** 2 + left_fit[1] * y_eval + left_fit[2]
+    right_line_pixels.current_x = right_fit[0] * y_eval ** 2 + right_fit[1] * y_eval + right_fit[2]
+
+    return out_img, left_line_pixels, right_line_pixels
+
+def get_lane_curvature(left_line, right_line):
+    """
+    Function returns the lane curvature as mean of the left and right lane curvature
+    """
+    return np.mean((left_line.radius_of_curvature, right_line.radius_of_curvature))
+
+def get_car_offset(width, left_line, right_line):
+    # Meters in pixel
+    ym_per_pix = 22/720
+    xm_per_pix = 3.7/990
+
+    # x position of lane center
+    right_line_x = right_line.current_x
+    left_line_x = left_line.current_x
+
+    lane_center_x = (right_line_x+left_line_x)/2
+    
+    # Offset calculation
+    car_center = width * xm_per_pix / 2
+    car_offset = car_center - (lane_center_x)
+
+    return car_offset
+
+def warp_back_results(warped_img, undist_img, Minv, left_line, right_line):
+    # Radius and offset
+    radius = get_lane_curvature(left_line, right_line)
+    offset = get_car_offset(undist_img.shape[1], left_line, right_line)
+
+    # Meters per pixel
+    ym_per_pix = 22/720
+    xm_per_pix = 3.7/990
+
+    # retransform meters into pixels
+    left_fitx /= xm_per_pix
+    right_fitx /= xm_per_pix
+
+    ploty = np.linspace(0, (undist_img.shape[0]-1), undist_img.shape[0])
+
+    warp_zero = np.zeros_like(warped_img).astype(np.uint8)
+    color_warp = undist_img
+
+    # Recast the x and y points into usable format for cv2.fillPoly()
+    pts_left = np.array([np.transpose(np.vstack([left_line.current_x, ploty]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_line.currentx, ploty])))])
+    pts = np.hstack((pts_left, pts_right))
+
+    # Draw the lane onto the warped blank image
+    cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
+
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    newwarp = cv2.warpPerspective(color_warp, Minv, (undist_img.shape[1], undist_img.shape[0])) 
+    # Combine the result with the original image
+    result = cv2.addWeighted(undist_img, 1, newwarp, 0.3, 0)
+
+    ## Write text to image
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    line1 = "Radius of curvature: " + str(np.around(radius, decimals=2)) + "m"
+    if offset < 0:
+        line2 = "Vehicle is " + str(np.abs(np.around(offset, decimals=2))) + "m left of center"
+    else:
+        line2 = "Vehicle is " + str(np.abs(np.around(offset, decimals=2))) + "m right of center"
+    cv2.putText(result, line1, (50,80), font, 2, (255,255,255), 2, cv2.LINE_AA)
+    cv2.putText(result, line2, (50,150), font, 2, (255,255,255), 2, cv2.LINE_AA)
+
+    return result
