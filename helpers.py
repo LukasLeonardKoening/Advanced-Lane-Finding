@@ -42,3 +42,22 @@ def calibrateCamera():
             obj_points.append(objp)
 
     return obj_points, img_points
+
+def undistortImage(image, o_points, i_points):
+    """
+    Undistort Images from a camera
+    INPUT: distorted image, object_points, image_points (both from calibrateCamera())
+    OUTPUT: undistorted image or error on failure
+    """
+    # Convert to gray scale
+    #gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+    # Calculate Camera matrix and distance coefficients 
+    ret, cam_matrix, distance_coeff, rot_vec, trans_vec = cv2.calibrateCamera(o_points, i_points, gray.shape, None, None)
+    if ret:
+        # return undistorted image
+        return cv2.undistort(image, cam_matrix, distance_coeff)
+    else:
+        # raise error if camera calibration fails
+        raise ValueError("Can not undistort the given image!")
