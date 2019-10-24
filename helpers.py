@@ -163,3 +163,26 @@ def create_thresholded_binary_image(rgb_image):
     binary[(color_based_threshold | sobel_based_threshold)] = 1
 
     return binary
+
+def transform_road(binary_image):
+    """
+    Function transforms an image into the 'bird view'-perspective
+    INPUT: binary image from create_thresholded_binary_image()
+    OUTPUT: transformed binary image and inversed matrix for undoing the transformation
+    """
+    # Image size
+    xsize = binary_image.shape[1]
+    ysize = binary_image.shape[0]
+
+    # Select source points
+    src = np.float32([[554, 465], [735, 465], [90, ysize], [xsize, ysize]])
+
+    # Select destination points
+    dest = np.float32([[0,0],[xsize,0],[0, ysize],[xsize,ysize]])
+
+    # Perform transformation
+    M = cv2.getPerspectiveTransform(src, dest)
+    Minv = cv2.getPerspectiveTransform(dest, src)
+    warped = cv2.warpPerspective(binary_image, M, (xsize, ysize), flags=cv2.INTER_LINEAR)
+
+    return warped, Minv
