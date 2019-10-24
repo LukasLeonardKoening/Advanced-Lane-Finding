@@ -39,3 +39,19 @@ right_lane_line = Line()
 
 # Camera calibration
 op, ip = helpers.calibrateCamera()
+
+def test_from_scratch(test_image):
+    undistort_img = helpers.undistortImage(test_image, op, ip)
+
+    thresholded_img = helpers.create_thresholded_binary_image(undistort_img)
+
+    transformed_img, M_inv = helpers.transform_road(thresholded_img)
+
+    identified_lines_image, left_lane_line_1, right_lane_line_1 = helpers.calc_curvature(transformed_img, left_lane_line, right_lane_line)
+    
+    result = helpers.warp_back_results(transformed_img, identified_lines_image, undistort_img, M_inv, left_lane_line_1, right_lane_line_1)
+
+    plt.imshow(result)
+    plt.show()
+
+test_from_scratch(test_image)
