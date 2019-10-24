@@ -16,16 +16,20 @@ class Line():
     def __init__(self):
         # was the line detected in the last iteration?
         self.detected = False  
-        # x values of the last n fits of the line
-        self.recent_xfitted = [] 
+        # x value of the line
+        self.current_x = False
         # last coefficients 
         self.recent_coeff = []
         #polynomial coefficients for the most recent fit
         self.current_fit = [np.array([False])]  
         #radius of curvature of the line in meters
         self.radius_of_curvature = None 
+        # recent optimal radius value over last n frames
+        self.recent_radius = None 
         #distance in meters of vehicle center from the line
-        self.line_base_pos = None 
+        self.offset = None 
+        # recent optimal distance value over last n frames
+        self.recent_offset = None 
         #x values for detected line pixels
         self.allx = None  
         #y values for detected line pixels
