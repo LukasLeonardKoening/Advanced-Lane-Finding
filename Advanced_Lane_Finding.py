@@ -34,3 +34,5 @@ class Line():
         self.allx = None  
         #y values for detected line pixels
         self.ally = None
+
+        self.fitX = None
