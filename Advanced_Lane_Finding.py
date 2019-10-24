@@ -6,11 +6,6 @@ import matplotlib.image as mpl_img
 import glob
 import helpers
 
-# variable decleration
-test_image = plt.imread("test_images/test4.jpg")
-left_lane_line = Line()
-right_lane_line = Line()
-
 # line class decleration
 class Line():
     def __init__(self):
@@ -36,3 +31,11 @@ class Line():
         self.ally = None
 
         self.fitX = None
+
+# variable decleration
+test_image = plt.imread("test_images/test4.jpg")
+left_lane_line = Line()
+right_lane_line = Line()
+
+# Camera calibration
+op, ip = helpers.calibrateCamera()
