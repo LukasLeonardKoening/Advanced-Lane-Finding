@@ -349,7 +349,7 @@ def warp_back_results(color_img, undist_img, Minv, left_line, right_line):
     ym_per_pix = 22/720
     xm_per_pix = 3.7/990
 
-    ploty = np.linspace(0, (undist_img.shape[0]-1), undist_img.shape[0])
+    ploty = np.linspace(0, (undist_img.shape[0]-1), undist_img.shape[0]) / ym_per_pix
     left_fitx = left_line.fitX / xm_per_pix
     right_fitx = right_line.fitX / xm_per_pix
 
