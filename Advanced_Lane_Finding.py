@@ -49,7 +49,7 @@ def test_from_scratch(test_image):
 
     identified_lines_image, left_lane_line_1, right_lane_line_1 = helpers.calc_curvature(transformed_img, left_lane_line, right_lane_line)
     
-    result = helpers.warp_back_results(transformed_img, identified_lines_image, undistort_img, M_inv, left_lane_line_1, right_lane_line_1)
+    result = helpers.warp_back_results(identified_lines_image, undistort_img, M_inv, left_lane_line_1, right_lane_line_1)
 
     plt.imshow(result)
     plt.show()

@@ -340,7 +340,7 @@ def get_car_offset(width, left_line, right_line):
 
     return car_offset
 
-def warp_back_results(warped_img, undist_img, Minv, left_line, right_line):
+def warp_back_results(color_img, undist_img, Minv, left_line, right_line):
     # Radius and offset
     radius = get_lane_curvature(left_line, right_line)
     offset = get_car_offset(undist_img.shape[1], left_line, right_line)
@@ -353,8 +353,7 @@ def warp_back_results(warped_img, undist_img, Minv, left_line, right_line):
     left_fitx = left_line.fitX / xm_per_pix
     right_fitx = right_line.fitX / xm_per_pix
 
-    warp_zero = np.zeros_like(warped_img).astype(np.uint8)
-    color_warp = undist_img
+    color_warp = color_img
 
     # Recast the x and y points into usable format for cv2.fillPoly()
     pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
