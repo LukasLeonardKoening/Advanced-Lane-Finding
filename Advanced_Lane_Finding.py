@@ -29,7 +29,7 @@ class Line():
         self.allx = None  
         #y values for detected line pixels
         self.ally = None
-
+        # polynomial fit x values of the curvature
         self.fitX = None
 
 # variable decleration
