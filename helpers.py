@@ -6,6 +6,10 @@ import matplotlib.image as mpl_img
 import glob
 import helpers
 
+# Meters per pixel
+ym_per_pix = 22/720
+xm_per_pix = 3.7/990
+
 def calibrateCamera():
     """
     Calculates parameters needed for camera calibration with the help of the calibration images
