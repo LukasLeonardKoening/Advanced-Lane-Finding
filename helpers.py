@@ -337,6 +337,7 @@ def get_car_offset(width, left_line, right_line):
     right_line_x = right_line.current_x
     left_line_x = left_line.current_x
 
+    # calculate x-value of center of lane at bottom of image (at cars position)
     lane_center_x = (right_line_x+left_line_x)/2
     
     # Offset calculation
