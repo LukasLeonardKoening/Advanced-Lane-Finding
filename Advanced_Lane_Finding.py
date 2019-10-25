@@ -23,10 +23,6 @@ class Line():
         self.radius_of_curvature = None 
         # recent optimal radius value over last n frames
         self.recent_radius = None 
-        #distance in meters of vehicle center from the line
-        self.offset = None 
-        # recent optimal distance value over last n frames
-        self.recent_offset = None 
         #x values for detected line pixels
         self.allx = None  
         #y values for detected line pixels
