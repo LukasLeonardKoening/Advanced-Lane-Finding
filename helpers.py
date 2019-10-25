@@ -370,12 +370,15 @@ def warp_back_results(lane_img, undistorted_img, Minv, left_line, right_line):
     pts = np.hstack((pts_left, pts_right))
 
     # Draw the lane onto the warped blank image
-    cv2.fillPoly(lane_img, np.int_([pts]), (0,255, 0))
+    lane_draw_image = np.zeros_like(lane_img)
+    cv2.fillPoly(lane_draw_image, np.int_([pts]), (0,255, 0))
+    lane_img = cv2.addWeighted(lane_img, 1, lane_draw_image, 0.3, 0)
 
     # Warp the blank back to original image space using inverse perspective matrix (Minv)
     newwarp = cv2.warpPerspective(lane_img, Minv, (undistorted_img.shape[1], undistorted_img.shape[0])) 
     # Combine the result with the original image
-    result = cv2.addWeighted(undistorted_img, 1, newwarp, 0.3, 0)
+    result = cv2.addWeighted(undistorted_img, 1, newwarp, 1, 0)
+
 
     ## Write text to image
     font = cv2.FONT_HERSHEY_SIMPLEX
