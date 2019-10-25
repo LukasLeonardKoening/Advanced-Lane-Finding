@@ -191,7 +191,7 @@ def transform_road(binary_image):
 
     return warped, Minv
 
-def find_lane_line_pixels(trans_img, left_line, right_line):
+def find_pixels_by_histogram(trans_img):#, left_line, right_line):
     """
     Function finds pixels on the binary filtered image and selects pixels according to histogram peaks
     """
@@ -200,7 +200,7 @@ def find_lane_line_pixels(trans_img, left_line, right_line):
     ysize = trans_img.shape[0]
 
     # Create an output image
-    out_img = np.dstack((trans_img, trans_img, trans_img))
+    #out_img = np.dstack((trans_img, trans_img, trans_img))
 
     # Calculate initial left and right x
     part_of_image = trans_img[int(trans_img.shape[0]//2):, :]
@@ -261,51 +261,33 @@ def find_lane_line_pixels(trans_img, left_line, right_line):
     righty = nonzeroY[right_lane_ind]
 
     # Add pixels to line
-    left_line.allx = leftx
-    left_line.ally = lefty
-    right_line.allx = rightx
-    right_line.ally = righty
+    # left_line.allx = leftx
+    # left_line.ally = lefty
+    # right_line.allx = rightx
+    # right_line.ally = righty
 
-    return out_img, left_line, right_line
+    return leftx, lefty, rightx, righty
 
-def calc_curvature(trans_img, left_line, right_line):
-    """
-    Function calculates the curvature and plots it on the binary image
-    """
-    out_img, left_line_pixels, right_line_pixels = find_lane_line_pixels(trans_img, left_line, right_line)
-    leftx = left_line_pixels.allx
-    lefty = left_line_pixels.ally
-    rightx = right_line_pixels.allx
-    righty = right_line_pixels.ally
+    #return out_img, left_line, right_line
 
-    # Image dimensions
-    ysize = trans_img.shape[0]
-    xsize = trans_img.shape[1]
-
-    # Calculate polynomial fit 
+def fit_poly(img_shape, leftx, lefty, rightx, righty):
     left_fit = np.polyfit(lefty * ym_per_pix, leftx * xm_per_pix, 2)
     right_fit = np.polyfit(righty * ym_per_pix, rightx * xm_per_pix, 2)
+    ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
+    return left_fit, right_fit, ploty
 
-    if not (len(left_line_pixels.current_fit) == 0):#[np.array([False])]):
-        left_line_pixels.recent_coeff = left_line_pixels.current_fit
-    if not (len(right_line_pixels.current_fit) == 0):# == [np.array([False])]):
-        right_line_pixels.recent_coeff = right_line_pixels.current_fit
-    left_line_pixels.current_fit = left_fit
-    right_line_pixels.current_fit = right_fit
+def fit_poly_pixel(img_shape, leftx, lefty, rightx, righty):
+    left_fit = np.polyfit(lefty, leftx, 2)
+    right_fit = np.polyfit(righty, rightx, 2)
+    ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
+    return left_fit, right_fit, ploty
+
+def calc_curvature(trans_img, leftx, lefty, rightx, righty):
 
     # Generate x and y values for plotting
-    ploty = np.linspace(0, (trans_img.shape[0]-1), trans_img.shape[0])
-
+    left_fit, right_fit, ploty = fit_poly(trans_img.shape, leftx, lefty, rightx, righty)
     left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
     right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-
-    left_line_pixels.fitX = left_fitx
-    right_line_pixels.fitX = right_fitx
-
-    ## Visualization ##
-    # Colors in the left and right lane regions
-    out_img[lefty, leftx] = [255, 0, 0]
-    out_img[righty, rightx] = [0, 0, 255]
 
     ## Curvature calculation
     y_eval = np.max(ploty) * ym_per_pix # y at which radius is calculated
@@ -314,14 +296,68 @@ def calc_curvature(trans_img, left_line, right_line):
     left_curvature = np.sqrt((1+(2*left_fit[0]*y_eval+left_fit[1])**2)**3)/np.abs(2*left_fit[0])
     right_curvature = np.sqrt((1+(2*right_fit[0]*y_eval+right_fit[1])**2)**3)/np.abs(2*right_fit[0])
 
-    left_line_pixels.radius_of_curvature = left_curvature
-    right_line_pixels.radius_of_curvature = right_curvature
-
     ## Position calculation
-    left_line_pixels.current_x = left_fit[0] * y_eval ** 2 + left_fit[1] * y_eval + left_fit[2]
-    right_line_pixels.current_x = right_fit[0] * y_eval ** 2 + right_fit[1] * y_eval + right_fit[2]
+    left_current_x = left_fit[0] * y_eval ** 2 + left_fit[1] * y_eval + left_fit[2]
+    right_current_x = right_fit[0] * y_eval ** 2 + right_fit[1] * y_eval + right_fit[2]
 
-    return out_img, left_line_pixels, right_line_pixels
+    ## Visualization ##
+    # Create output image
+    out_img = np.dstack((trans_img, trans_img, trans_img))
+    # Colors in the left and right lane regions
+    out_img[lefty, leftx] = [255, 0, 0]
+    out_img[righty, rightx] = [0, 0, 255]
+
+    return out_img, [left_fit, left_fitx, left_curvature, left_current_x], [right_fit, right_fitx, right_curvature, right_current_x]
+
+# def calc_curvature(trans_img, left_line, right_line):
+#     """
+#     Function calculates the curvature and plots it on the binary image
+#     """
+#     #out_img, left_line_pixels, right_line_pixels = find_lane_line_pixels(trans_img, left_line, right_line)
+
+#     # Save recent poly fit
+#     if not (len(left_line_pixels.current_fit) == 0):#[np.array([False])]):
+#         left_line_pixels.recent_coeff = left_line_pixels.current_fit
+#     if not (len(right_line_pixels.current_fit) == 0):# == [np.array([False])]):
+#         right_line_pixels.recent_coeff = right_line_pixels.current_fit
+
+#     # Generate x and y values for plotting
+#     left_fit, right_fit, ploty = fit_poly(out_img.shape, left_line_pixels.allx, left_line_pixels.ally, right_line_pixels.allx, right_line_pixels.ally)
+#     left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
+#     right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+
+#     # Image dimensions
+#     ysize = trans_img.shape[0]
+#     xsize = trans_img.shape[1]
+
+#     # Save new poly fit
+#     left_line_pixels.current_fit = left_fit
+#     right_line_pixels.current_fit = right_fit
+
+#     # Save current x values for plotting
+#     left_line_pixels.fitX = left_fitx
+#     right_line_pixels.fitX = right_fitx
+
+#     ## Visualization ##
+#     # Colors in the left and right lane regions
+#     out_img[lefty, leftx] = [255, 0, 0]
+#     out_img[righty, rightx] = [0, 0, 255]
+
+#     ## Curvature calculation
+#     y_eval = np.max(ploty) * ym_per_pix # y at which radius is calculated
+
+#     # Left and right lane curvature calculation
+#     left_curvature = np.sqrt((1+(2*left_fit[0]*y_eval+left_fit[1])**2)**3)/np.abs(2*left_fit[0])
+#     right_curvature = np.sqrt((1+(2*right_fit[0]*y_eval+right_fit[1])**2)**3)/np.abs(2*right_fit[0])
+
+#     left_line_pixels.radius_of_curvature = left_curvature
+#     right_line_pixels.radius_of_curvature = right_curvature
+
+#     ## Position calculation
+#     left_line_pixels.current_x = left_fit[0] * y_eval ** 2 + left_fit[1] * y_eval + left_fit[2]
+#     right_line_pixels.current_x = right_fit[0] * y_eval ** 2 + right_fit[1] * y_eval + right_fit[2]
+
+#     return out_img, left_line_pixels, right_line_pixels
 
 def get_lane_curvature(left_line, right_line):
     """
