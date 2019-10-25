@@ -286,9 +286,9 @@ def calc_curvature(trans_img, left_line, right_line):
     left_fit = np.polyfit(lefty * ym_per_pix, leftx * xm_per_pix, 2)
     right_fit = np.polyfit(righty * ym_per_pix, rightx * xm_per_pix, 2)
 
-    if not (left_line_pixels.current_fit == [np.array([False])]):
+    if not (len(left_line_pixels.current_fit) == 0):#[np.array([False])]):
         left_line_pixels.recent_coeff = left_line_pixels.current_fit
-    if not (right_line_pixels.current_fit == [np.array([False])]):
+    if not (len(right_line_pixels.current_fit) == 0):# == [np.array([False])]):
         right_line_pixels.recent_coeff = right_line_pixels.current_fit
     left_line_pixels.current_fit = left_fit
     right_line_pixels.current_fit = right_fit
