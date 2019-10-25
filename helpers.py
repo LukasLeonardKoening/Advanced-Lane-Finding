@@ -192,6 +192,9 @@ def transform_road(binary_image):
     return warped, Minv
 
 def find_lane_line_pixels(trans_img, left_line, right_line):
+    """
+    Function finds pixels on the binary filtered image and selects pixels according to histogram peaks
+    """
     # Image size
     xsize = trans_img.shape[1]
     ysize = trans_img.shape[0]
@@ -266,6 +269,9 @@ def find_lane_line_pixels(trans_img, left_line, right_line):
     return out_img, left_line, right_line
 
 def calc_curvature(trans_img, left_line, right_line):
+    """
+    Function calculates the curvature and plots it on the binary image
+    """
     out_img, left_line_pixels, right_line_pixels = find_lane_line_pixels(trans_img, left_line, right_line)
     leftx = left_line_pixels.allx
     lefty = left_line_pixels.ally
@@ -333,6 +339,10 @@ def get_car_offset(width, left_line, right_line):
     xm_per_pix = 3.7/990
 
     # x position of lane center
+    """
+    Function calculates the car offset from the lane center
+    """
+    # x position of lines at bottom of image (at cars position)
     right_line_x = right_line.current_x
     left_line_x = left_line.current_x
 
@@ -344,8 +354,16 @@ def get_car_offset(width, left_line, right_line):
 
     return car_offset
 
-def warp_back_results(color_img, undist_img, Minv, left_line, right_line):
-    # Radius and offset
+def warp_back_results(lane_img, undistorted_img, Minv, left_line, right_line):
+    """
+    Function plots the results back on the original image
+    INPUT:  lane_image (from calc_curvature()), 
+            undistort_img (from undistortImage()), 
+            Minv (inversed undistortion matrix),
+            left_line (Line() instance for left line),
+            right_line (Line() instance for right line)
+    """
+    # get radius of lane and offset of car
     radius = get_lane_curvature(left_line, right_line)
     offset = get_car_offset(undist_img.shape[1], left_line, right_line)
 
