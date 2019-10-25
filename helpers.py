@@ -356,7 +356,7 @@ def warp_back_results(lane_img, undistorted_img, Minv, left_line, right_line):
     """
     # get radius of lane and offset of car
     radius = get_lane_curvature(left_line, right_line)
-    offset = get_car_offset(undist_img.shape[1], left_line, right_line)
+    offset = get_car_offset(undistorted_img.shape[1], left_line, right_line)
 
     # x and y values for plotting
     ploty = np.linspace(0, (undistorted_img.shape[0]-1), undistorted_img.shape[0]) / ym_per_pix
@@ -369,12 +369,12 @@ def warp_back_results(lane_img, undistorted_img, Minv, left_line, right_line):
     pts = np.hstack((pts_left, pts_right))
 
     # Draw the lane onto the warped blank image
-    cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
+    cv2.fillPoly(lane_img, np.int_([pts]), (0,255, 0))
 
     # Warp the blank back to original image space using inverse perspective matrix (Minv)
-    newwarp = cv2.warpPerspective(color_warp, Minv, (undist_img.shape[1], undist_img.shape[0])) 
+    newwarp = cv2.warpPerspective(lane_img, Minv, (undistorted_img.shape[1], undistorted_img.shape[0])) 
     # Combine the result with the original image
-    result = cv2.addWeighted(undist_img, 1, newwarp, 0.3, 0)
+    result = cv2.addWeighted(undistorted_img, 1, newwarp, 0.3, 0)
 
     ## Write text to image
     font = cv2.FONT_HERSHEY_SIMPLEX
