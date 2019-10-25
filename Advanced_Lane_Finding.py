@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpl_img
 import glob
 import helpers
+import os
+from moviepy.editor import VideoFileClip
 
 # line class decleration
 class Line():
@@ -51,7 +53,17 @@ def test_from_scratch(test_image):
     
     result = helpers.warp_back_results(identified_lines_image, undistort_img, M_inv, left_lane_line_1, right_lane_line_1)
 
-    plt.imshow(result)
-    plt.show()
+    return result
 
-test_from_scratch(test_image)
+# im = test_from_scratch(test_image)
+# plt.imshow(im)
+# plt.show()
+
+def test_video_without_prior():
+    ## Video
+    output = 'output_videos/project.mp4'
+    clip = VideoFileClip("test_videos/project_video.mp4").subclip(0,5)
+    processed_clip = clip.fl_image(test_from_scratch)
+    processed_clip.write_videofile(output, audio=False)
+
+test_video_without_prior()
