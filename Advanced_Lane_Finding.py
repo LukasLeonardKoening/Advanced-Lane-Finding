@@ -13,7 +13,7 @@ class Line():
     def __init__(self):
         # was the line detected in the last iteration?
         self.detected = False  
-        # x value of the line
+        # x value of the line at the bottom of the image (= at the cars position)
         self.current_x = False
         # last coefficients 
         self.recent_coeff = []
