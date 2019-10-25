@@ -18,7 +18,7 @@ class Line():
         # last coefficients 
         self.recent_coeff = []
         #polynomial coefficients for the most recent fit
-        self.current_fit = [np.array([False])]  
+        self.current_fit = []#[np.array([False])]  
         #radius of curvature of the line in meters
         self.radius_of_curvature = None 
         # recent optimal radius value over last n frames
