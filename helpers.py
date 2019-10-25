@@ -282,6 +282,33 @@ def fit_poly_pixel(img_shape, leftx, lefty, rightx, righty):
     ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
     return left_fit, right_fit, ploty
 
+def find_pixels_by_prior(trans_img, old_leftx, old_lefty, old_rightx, old_righty):
+    # Parameters
+    margin = 100 # margin for window size
+
+    recent_left_fit, recent_right_fit, ploty = fit_poly_pixel(trans_img.shape, old_leftx, old_lefty, old_rightx, old_righty)
+
+    # Nonzero pixels
+    nonzero = trans_img.nonzero()
+    nonzeroY = np.array(nonzero[0])
+    nonzeroX = np.array(nonzero[1])
+
+    # Gather pixels from prior
+    left_lane_ind = ((nonzeroX > (recent_left_fit[0]*(nonzeroY**2) + recent_left_fit[1]*nonzeroY + 
+                    recent_left_fit[2] - margin)) & (nonzeroX < (recent_left_fit[0]*(nonzeroY**2) + 
+                    recent_left_fit[1]*nonzeroY + recent_left_fit[2] + margin)))
+    right_lane_ind = ((nonzeroX > (recent_right_fit[0]*(nonzeroY**2) + recent_right_fit[1]*nonzeroY + 
+                    recent_right_fit[2] - margin)) & (nonzeroX < (recent_right_fit[0]*(nonzeroY**2) + 
+                    recent_right_fit[1] * nonzeroY + recent_right_fit[2] + margin)))
+    
+    # Extract left and right line pixel positions
+    leftx = nonzeroX[left_lane_ind]
+    lefty = nonzeroY[left_lane_ind] 
+    rightx = nonzeroX[right_lane_ind]
+    righty = nonzeroY[right_lane_ind]
+
+    return leftx, lefty, rightx, righty
+
 def calc_curvature(trans_img, leftx, lefty, rightx, righty):
 
     # Generate x and y values for plotting
