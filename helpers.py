@@ -282,10 +282,6 @@ def calc_curvature(trans_img, left_line, right_line):
     ysize = trans_img.shape[0]
     xsize = trans_img.shape[1]
 
-    # Meters in pixel
-    ym_per_pix = 22/720
-    xm_per_pix = 3.7/990
-
     # Calculate polynomial fit 
     left_fit = np.polyfit(lefty * ym_per_pix, leftx * xm_per_pix, 2)
     right_fit = np.polyfit(righty * ym_per_pix, rightx * xm_per_pix, 2)
@@ -334,11 +330,6 @@ def get_lane_curvature(left_line, right_line):
     return np.mean((left_line.radius_of_curvature, right_line.radius_of_curvature))
 
 def get_car_offset(width, left_line, right_line):
-    # Meters in pixel
-    ym_per_pix = 22/720
-    xm_per_pix = 3.7/990
-
-    # x position of lane center
     """
     Function calculates the car offset from the lane center
     """
@@ -367,15 +358,10 @@ def warp_back_results(lane_img, undistorted_img, Minv, left_line, right_line):
     radius = get_lane_curvature(left_line, right_line)
     offset = get_car_offset(undist_img.shape[1], left_line, right_line)
 
-    # Meters per pixel
-    ym_per_pix = 22/720
-    xm_per_pix = 3.7/990
-
-    ploty = np.linspace(0, (undist_img.shape[0]-1), undist_img.shape[0]) / ym_per_pix
+    # x and y values for plotting
+    ploty = np.linspace(0, (undistorted_img.shape[0]-1), undistorted_img.shape[0]) / ym_per_pix
     left_fitx = left_line.fitX / xm_per_pix
     right_fitx = right_line.fitX / xm_per_pix
-
-    color_warp = color_img
 
     # Recast the x and y points into usable format for cv2.fillPoly()
     pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
