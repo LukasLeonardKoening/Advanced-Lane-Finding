@@ -92,7 +92,6 @@ def process_frame(frame_image):
         # 5) Calculate curvature
         colored_transformed_img, left_line_values, right_line_values = helpers.calc_curvature(transformed_img, leftx, lefty, rightx, righty)
         # 6) Add lane line data
-        #sanity_check(left_line_values, right_line_values)
 
         # Sanity check for first frame
         left_radius = left_line_values[2]
@@ -154,7 +153,7 @@ def process_frame(frame_image):
                 frame_fails += 1
 
         else:
-            # 6) Update lane line data
+            # 7) Update lane line data
             left_lane_line.update_pixel_values(leftx, lefty, left_line_values[3], left_line_values[1])
 
             left_lane_line.set_recent_fit(left_lane_line.current_fit)
