@@ -206,11 +206,12 @@ def process_frame(frame_image):
 # plt.imshow(im)
 # plt.show()
 
-def test_video_without_prior():
+def test_video_with_prior():
     ## Video
     output = 'output_videos/project.mp4'
-    clip = VideoFileClip("test_videos/project_video.mp4").subclip(0,5)
-    processed_clip = clip.fl_image(test_from_scratch)
+    clip = VideoFileClip("test_videos/project_video.mp4").subclip(15, 30)
+    processed_clip = clip.fl_image(process_frame)
     processed_clip.write_videofile(output, audio=False)
+    print("New calculated frames: " + str(new_calc_frames))
 
-test_video_without_prior()
+test_video_with_prior()
