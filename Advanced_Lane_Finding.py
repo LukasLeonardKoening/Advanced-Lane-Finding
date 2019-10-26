@@ -56,6 +56,22 @@ right_lane_line = Line()
 # Camera calibration
 op, ip = helpers.calibrateCamera()
 
+def sanity_check(left_line_values, right_line_values):
+    # 6) Sanity checks
+    # 6.1) curvature comparison to prior
+    prior_lane_radius = helpers.get_lane_curvature(left_lane_line, right_lane_line)
+    new_lane_radius = np.mean((left_line_values[2], right_line_values[2]))
+    curvature_check = (new_lane_radius < prior_lane_radius - curvature_tolerance) or (new_lane_radius > prior_lane_radius + curvature_tolerance) or (prior_lane_radius * 2 > new_lane_radius) or (prior_lane_radius / 2 > new_lane_radius)
+    # 6.2) curvature parallelism
+    left_radius = left_line_values[2]
+    right_radius = right_line_values[2]
+    curvature_parallelism = (left_radius * 10 < right_radius) or (right_radius * 10 < left_radius)
+    # 6.3) slope comparison
+    left_slope = left_line_values[0]
+    right_slope = right_line_values[0]
+    # print(left_radius)
+    # print(right_radius)
+    return curvature_check or curvature_parallelism
 
 def process_frame(frame_image):
     global frame_fails
@@ -103,16 +119,6 @@ def process_frame(frame_image):
         # 5) Calculate curvature
         colored_transformed_img, left_line_values, right_line_values = helpers.calc_curvature(transformed_img, leftx, lefty, rightx, righty)
         # 6) Sanity checks
-        
-        # 6.1) curvature comparison to prior
-        prior_lane_radius = helpers.get_lane_curvature(left_lane_line, right_lane_line)
-        new_lane_radius = np.mean((left_line_values[2], right_line_values[2]))
-        curvature_check = (new_lane_radius < prior_lane_radius - curvature_tolerance) or (new_lane_radius > prior_lane_radius + curvature_tolerance)
-        # 6.2) curvature parallelism
-        left_radius = left_line_values[2]
-        right_radius = right_line_values[2]
-        curvature_parallelism = (left_radius * 10 < right_radius) or (right_radius * 10 < left_radius)
-
         if (sanity_check(left_line_values, right_line_values)):
             global new_calc_frames
             new_calc_frames += 1
@@ -168,16 +174,6 @@ def process_frame(frame_image):
         # 5) Calculate curvature
         colored_transformed_img, left_line_values, right_line_values = helpers.calc_curvature(transformed_img, leftx, lefty, rightx, righty)
         # 6) Sanity checks
-        sanity_check(left_line_values, right_line_values)
-        # 6.1) curvature comparison to prior
-        prior_lane_radius = helpers.get_lane_curvature(left_lane_line, right_lane_line)
-        new_lane_radius = np.mean((left_line_values[2], right_line_values[2]))
-        curvature_check = (new_lane_radius < prior_lane_radius - curvature_tolerance) or (new_lane_radius > prior_lane_radius + curvature_tolerance)
-        # 6.2) curvature parallelism
-        left_radius = left_line_values[2]
-        right_radius = right_line_values[2]
-        curvature_parallelism = (left_radius * 10 < right_radius) or (right_radius * 10 < left_radius)
-
         if (sanity_check(left_line_values, right_line_values)):
             left_lane_line.detected = False
             right_lane_line.detected = False
