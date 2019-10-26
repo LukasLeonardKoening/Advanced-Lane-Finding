@@ -29,6 +29,24 @@ class Line():
         self.ally = None
         # polynomial fit x values of the curvature
         self.fitX = None
+    
+    def update_pixel_values(self, n_allx, n_ally, n_currentx, n_fitx):
+        self.allx = n_allx
+        self.ally = n_ally
+        self.current_x = n_currentx
+        self.fitX = n_fitx
+
+    def set_recent_fit(self, n_recent_coeff):
+        self.recent_coeff = n_recent_coeff
+
+    def set_current_fit(self, n_current_fit):
+        self.current_fit = n_current_fit
+
+    def set_current_radius(self, n_radius):
+        self.radius_of_curvature = n_radius
+    
+    def set_recent_radius(self, n_recent_r):
+        self.recent_radius = n_recent_r
 
 # variable decleration
 test_image = plt.imread("test_images/test4.jpg")
