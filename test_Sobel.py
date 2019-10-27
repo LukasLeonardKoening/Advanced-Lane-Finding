@@ -61,26 +61,26 @@ def dir_threshold(image, sobel_kernel=3, thresh=(0, np.pi/2)):
     dir_binary[(direction > thresh[0]) & (direction < thresh[1])] = 1
     return dir_binary
 
-image = mpimg.imread("test_images/straight_lines1.jpg")
+image = mpimg.imread("test_images/test10.jpg")
 
 # Choose a Sobel kernel size
-ksize = 1 # Choose a larger odd number to smooth gradient measurements
+ksize = 3 # Choose a larger odd number to smooth gradient measurements
 
 # Apply each of the thresholding functions
-gradx = abs_sobel_thresh(image, orient='x', sobel_kernel=ksize, thresh=(25, 100)) #20, 50
-grady = abs_sobel_thresh(image, orient='y', sobel_kernel=ksize, thresh=(25, 100)) #20, 50
-mag_binary = mag_thresh(image, sobel_kernel=ksize, mag_thresh=(35, 85))
-dir_binary = dir_threshold(image, sobel_kernel=ksize, thresh=(np.pi/4, 4*np.pi/10))
+gradx = abs_sobel_thresh(image, orient='x', sobel_kernel=ksize, thresh=(30, 100)) #20, 50
+grady = abs_sobel_thresh(image, orient='y', sobel_kernel=ksize, thresh=(40, 100)) #20, 50
+mag_binary = mag_thresh(image, sobel_kernel=9, mag_thresh=(40, 100))
+dir_binary = dir_threshold(image, sobel_kernel=15, thresh=(0.7, 1.1)) # np.pi/4, 4*np.pi/10
 
 # Image size
 xsize = image.shape[1]
 ysize = image.shape[0]
 
 # Thresholds
-lower_s_threshold = 180
+lower_s_threshold = 100
 upper_s_threshold = 255
-lower_h_threshold = 22
-upper_h_threshold = 25
+lower_v_threshold = 180
+upper_v_threshold = 255
 
 # Color conversions
 hls = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
