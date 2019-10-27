@@ -163,10 +163,10 @@ def create_thresholded_binary_image(rgb_image):
     # Sobel thresholds
     ksize = 1 # Sobel kernel size
 
-    gradx = abs_sobel_thresh(rgb_image, orient='x', sobel_kernel=ksize, thresh=(25, 100)) #20, 50
-    grady = abs_sobel_thresh(rgb_image, orient='y', sobel_kernel=ksize, thresh=(25, 100)) #20, 50
-    mag_binary = mag_thresh(rgb_image, sobel_kernel=ksize, mag_thresh=(35, 85))
-    dir_binary = dir_threshold(rgb_image, sobel_kernel=ksize, thresh=(np.pi/4, 4*np.pi/10)) # np.pi/4, np.pi/3
+    gradx = abs_sobel_thresh(rgb_image, orient='x', sobel_kernel=ksize, thresh=(30, 100))
+    grady = abs_sobel_thresh(rgb_image, orient='y', sobel_kernel=ksize, thresh=(40, 100))
+    mag_binary = mag_thresh(rgb_image, sobel_kernel=9, mag_thresh=(40, 100))
+    dir_binary = dir_threshold(rgb_image, sobel_kernel=15, thresh=(0.7, 1.1))
 
     sobel_based_threshold = ((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))
 
