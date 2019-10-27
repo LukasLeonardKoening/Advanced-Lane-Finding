@@ -161,7 +161,7 @@ def create_thresholded_binary_image(rgb_image):
     color_based_threshold = s_threshold & (white_mask | yellow_mask)
 
     # Sobel thresholds
-    ksize = 1 # Sobel kernel size
+    ksize = 3 # Sobel kernel size
 
     gradx = abs_sobel_thresh(rgb_image, orient='x', sobel_kernel=ksize, thresh=(30, 100))
     grady = abs_sobel_thresh(rgb_image, orient='y', sobel_kernel=ksize, thresh=(40, 100))
