@@ -200,7 +200,7 @@ def transform_road(binary_image):
 
     return warped, Minv
 
-def find_pixels_by_histogram(trans_img):#, left_line, right_line):
+def find_pixels_by_histogram(trans_img):
     """
     Function finds pixels on the binary filtered image and selects pixels according to histogram peaks
     """
@@ -342,7 +342,7 @@ def calc_curvature(trans_img, leftx, lefty, rightx, righty):
     # Colors in the left and right lane regions
     out_img[lefty, leftx] = [255, 0, 0]
     out_img[righty, rightx] = [0, 0, 255]
-
+    
     return out_img, [left_fit, left_fitx, left_curvature, left_current_x], [right_fit, right_fitx, right_curvature, right_current_x]
 
 # def calc_curvature(trans_img, left_line, right_line):
