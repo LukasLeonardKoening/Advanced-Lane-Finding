@@ -142,6 +142,11 @@ def save_new_line_data(left_line_data : LineData, right_lane_data : LineData):
     right_lane_line.detected = True
 
 def process_frame(frame_image):
+    """
+    This function process a frame from a video. The result is calculated from histogram peaks or from prior data according to the sanity check.
+    INPUT: RGB-image 
+    OUTPUT: annotated RGB-image
+    """
     global frame_fails
     # 1) Undistort
     undistort_img = helpers.undistortImage(frame_image, op, ip)
@@ -150,14 +155,16 @@ def process_frame(frame_image):
     # 3) Transform
     transformed_img, M_inv = helpers.transform_road(thresholded_img)
 
+    # Check if lines were calculated before
     if (left_lane_line.radius_of_curvature == None or right_lane_line.radius_of_curvature == None):
+        # if not, calculate it by histogram peak analysis
+
         # 4) Identify lane pixels
         leftx, lefty, rightx, righty = helpers.find_pixels_by_histogram(transformed_img)
         # 5) Calculate curvature
         colored_transformed_img, left_line_values, right_line_values = helpers.calc_curvature(transformed_img, leftx, lefty, rightx, righty)
-        # 6) Add lane line data
-
-        # Sanity check for first frame
+        
+        # 6) Sanity check for first frame; select smaller radius, if check fails
         left_radius = left_line_values[2]
         right_radius = right_line_values[2]
         if (left_radius * 10 < right_radius):
@@ -171,6 +178,7 @@ def process_frame(frame_image):
             LineData(rightx, righty, right_line_values[3], right_line_values[1], right_line_values[0], right_line_values[0], right_radius, right_radius)
             )
 
+        # if not and prior frames failed, calculate it by histogram peak analysis
 
     elif (left_lane_line.detected == False or right_lane_line.detected == False) and frame_fails > 10:
         # 4) Identify lane pixels
@@ -193,6 +201,8 @@ def process_frame(frame_image):
             frame_fails += 1
         
     else:
+        # If there is prior data, use it for next search
+
         # 4) Identify lane pixels
         leftx, lefty, rightx, righty = helpers.find_pixels_by_prior(transformed_img, left_lane_line.allx, left_lane_line.ally, right_lane_line.allx, right_lane_line.ally)
         # 5) Calculate curvature
@@ -209,14 +219,9 @@ def process_frame(frame_image):
             LineData(rightx, righty, right_line_values[3], right_line_values[1], right_lane_line.current_fit, right_line_values[0], np.mean((right_lane_line.radius_of_curvature, right_lane_line.recent_radius)), np.mean((right_line_values[2], right_lane_line.recent_radius)))
             )
 
-    # 7) Warp back results
-    #print("l: " + str(left_lane_line.radius_of_curvature) + "; r: " + str(right_lane_line.radius_of_curvature) + "; c: " +  str(np.mean((left_lane_line.radius_of_curvature, right_lane_line.radius_of_curvature))))
+    # 8) Warp back results
     result_img = helpers.warp_back_results(colored_transformed_img, undistort_img, M_inv, left_lane_line, right_lane_line)
     return result_img
-
-# im = test_from_scratch(test_image)
-# plt.imshow(im)
-# plt.show()
 
 def test_video_with_prior():
     ## Video
