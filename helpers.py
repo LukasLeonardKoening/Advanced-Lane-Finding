@@ -269,18 +269,27 @@ def find_pixels_by_histogram(trans_img):
     return leftx, lefty, rightx, righty
 
 def fit_poly(img_shape, leftx, lefty, rightx, righty):
+    """
+    Function calculates polynomial fits for left and right lane in meters
+    """
     left_fit = np.polyfit(lefty * ym_per_pix, leftx * xm_per_pix, 2)
     right_fit = np.polyfit(righty * ym_per_pix, rightx * xm_per_pix, 2)
     ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
     return left_fit, right_fit, ploty
 
 def fit_poly_pixel(img_shape, leftx, lefty, rightx, righty):
+    """
+    Function calculates polynomial fits for left and right lane in pixels
+    """
     left_fit = np.polyfit(lefty, leftx, 2)
     right_fit = np.polyfit(righty, rightx, 2)
     ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
     return left_fit, right_fit, ploty
 
 def find_pixels_by_prior(trans_img, old_leftx, old_lefty, old_rightx, old_righty):
+    """
+    Function finds pixels on the binary filtered image and selects pixels according to prior input
+    """
     # Parameters
     margin = 100 # margin for window size
 
@@ -308,7 +317,9 @@ def find_pixels_by_prior(trans_img, old_leftx, old_lefty, old_rightx, old_righty
     return leftx, lefty, rightx, righty
 
 def calc_curvature(trans_img, leftx, lefty, rightx, righty):
-
+    """
+    Function calculates the curvature and the current x position for both lines
+    """
     # Generate x and y values for plotting
     left_fit, right_fit, ploty = fit_poly(trans_img.shape, leftx, lefty, rightx, righty)
     left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
@@ -365,6 +376,7 @@ def warp_back_results(lane_img, undistorted_img, Minv, left_line, right_line):
             Minv (inversed undistortion matrix),
             left_line (Line() instance for left line),
             right_line (Line() instance for right line)
+    OUTPUT: annotated image with radius, offset, lane area
     """
     # get radius of lane and offset of car
     radius = get_lane_curvature(left_line, right_line)
