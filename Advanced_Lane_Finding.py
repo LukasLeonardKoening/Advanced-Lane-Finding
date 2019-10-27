@@ -6,6 +6,7 @@ import matplotlib.image as mpl_img
 import glob
 import helpers
 import os
+import math
 from moviepy.editor import VideoFileClip
 
 # line class decleration
@@ -75,6 +76,7 @@ def sanity_check(left_line_values, right_line_values):
     # print(left_radius)
     # print(right_radius)
     return curvature_check or curvature_parallelism
+    slope_close_check = math.isclose(left_slope, right_slope, rel_tol=5e-1)
 
 def process_frame(frame_image):
     global frame_fails
