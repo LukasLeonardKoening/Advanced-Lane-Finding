@@ -85,19 +85,26 @@ upper_v_threshold = 255
 # Color conversions
 hls = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
 s_hls = hls[:,:,2]
-h_hls = hls[:,:,0]
-h_hls[:int(2*ysize/3),:] = 0 # Had to remove some environment
+hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+v = hsv[:,:,2]
+
+# white mask
+h = hls[:,:,0]
+l = hls[:,:,1]
+white_mask = (l > 200) & (l <= 255)
+yellow_mask = (h > 14) & (h <= 25)
 
 # Color thresholds
 s_threshold = (s_hls > lower_s_threshold) & (s_hls <= upper_s_threshold)
-h_threshold = (h_hls > lower_h_threshold) & (h_hls <= upper_h_threshold)
-#color_based_threshold = (s_threshold | h_threshold)
-color_based_threshold = s_threshold
+v_threshold = (v > lower_v_threshold) & (v <= upper_v_threshold)
+#color_based_threshold = (white_mask | yellow_mask)
+color_based_threshold = s_threshold & (white_mask | yellow_mask)
 
 combined = np.zeros_like(dir_binary)
 combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) | color_based_threshold] = 1
 #combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
 #combined[((grady == 1) & (gradx == 1))] = 1
+#combined[((mag_binary == 1))] = 1
 #combined[((mag_binary == 1) & (dir_binary == 1))] = 1
 #combined[color_based_threshold] = 1
 

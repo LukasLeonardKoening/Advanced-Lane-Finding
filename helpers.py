@@ -142,15 +142,23 @@ def create_thresholded_binary_image(rgb_image):
     Function takes in an RGB image and returns an thresholded binary image with the lane lines 
     """
     # Thresholds
-    lower_s_threshold = 180
-    upper_s_threshold = 255
+    s_threshold = [100, 255]
+    white_threshold = [200, 255]
+    yellow_threshold = [14, 25]
 
     # Color conversions
     hls = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2HLS)
     s_hls = hls[:,:,2]
 
+    # white and yellow mask
+    h = hls[:,:,0]
+    l = hls[:,:,1]
+    white_mask = (l > white_threshold[0]) & (l <= white_threshold[1])
+    yellow_mask = (h > yellow_threshold[0]) & (h <= yellow_threshold[1])
+
     # Color thresholds
-    color_based_threshold = (s_hls > lower_s_threshold) & (s_hls <= upper_s_threshold)
+    s_threshold = (s_hls > s_threshold[0]) & (s_hls <= s_threshold[1])
+    color_based_threshold = s_threshold & (white_mask | yellow_mask)
 
     # Sobel thresholds
     ksize = 1 # Sobel kernel size
