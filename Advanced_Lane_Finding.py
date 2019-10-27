@@ -49,6 +49,25 @@ class Line():
     def set_recent_radius(self, n_recent_r):
         self.recent_radius = n_recent_r
 
+class LineData():
+    def __init__(self, allX, allY, currentX, fitx, recentFit, currentFit, recentR, currentR):
+        #x values for detected line pixels
+        self.allx = allX  
+        #y values for detected line pixels
+        self.ally = allY
+        # x value of the line at the bottom of the image (= at the cars position)
+        self.current_x = currentX
+        # polynomial fit x values of the curvature
+        self.fitX = fitx
+        # last coefficients 
+        self.recent_fit = recentFit
+        #polynomial coefficients for the most recent fit
+        self.current_fit = currentFit
+        # recent optimal radius value over last n frames
+        self.recent_radius = recentR
+        #radius of curvature of the line in meters
+        self.radius_of_curvature = currentR 
+        
 # variable decleration
 test_image = plt.imread("test_images/test4.jpg")
 left_lane_line = Line()
