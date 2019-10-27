@@ -122,6 +122,25 @@ def new_calc_test(left_line_values, right_line_values):
     curvature_parallelism = (left_radius * 2 < right_radius) or (right_radius * 2 < left_radius)
     return not (curvature_parallelism or curvature_check)
 
+def save_new_line_data(left_line_data : LineData, right_lane_data : LineData):
+    """
+    Function saves new Data to the two lines
+    """
+    left_lane_line.update_pixel_values(left_line_data.allx, left_line_data.ally, left_line_data.current_x, left_line_data.fitX)
+    left_lane_line.set_recent_fit(left_line_data.recent_fit)
+    left_lane_line.set_current_fit(left_line_data.current_fit)
+    left_lane_line.set_recent_radius(left_line_data.recent_radius)
+    left_lane_line.set_current_radius(left_line_data.radius_of_curvature)
+
+    right_lane_line.update_pixel_values(right_lane_data.allx, right_lane_data.ally, right_lane_data.current_x, right_lane_data.fitX)
+    right_lane_line.set_recent_fit(right_lane_data.recent_fit)
+    right_lane_line.set_current_fit(right_lane_data.current_fit)
+    right_lane_line.set_recent_radius(right_lane_data.recent_radius)
+    right_lane_line.set_current_radius(right_lane_data.radius_of_curvature)
+
+    left_lane_line.detected = True
+    right_lane_line.detected = True
+
 def process_frame(frame_image):
     global frame_fails
     # 1) Undistort
@@ -146,20 +165,13 @@ def process_frame(frame_image):
         elif (right_radius * 10 < left_radius):
             left_radius = right_radius
         
-        left_lane_line.update_pixel_values(leftx, lefty, left_line_values[3], left_line_values[1])
-        left_lane_line.set_current_fit(left_line_values[0])
-        left_lane_line.set_recent_fit(left_line_values[0])
-        left_lane_line.set_current_radius(left_radius)
-        left_lane_line.set_recent_radius(right_radius)
+        # 7) Save lane line data
+        save_new_line_data(
+            LineData(leftx, lefty, left_line_values[3], left_line_values[1], left_line_values[0], left_line_values[0], left_radius, left_radius),
+            LineData(rightx, righty, right_line_values[3], right_line_values[1], right_line_values[0], right_line_values[0], right_radius, right_radius)
+            )
 
-        right_lane_line.update_pixel_values(rightx, righty, right_line_values[3], right_line_values[1])
-        right_lane_line.set_current_fit(right_line_values[0])
-        right_lane_line.set_recent_fit(right_line_values[0])
-        right_lane_line.set_current_radius(right_radius)
-        right_lane_line.set_recent_radius(right_radius)
 
-        left_lane_line.detected = True
-        right_lane_line.detected = True
     elif (left_lane_line.detected == False or right_lane_line.detected == False) and frame_fails > 10:
         # 4) Identify lane pixels
         leftx, lefty, rightx, righty = helpers.find_pixels_by_prior(transformed_img, left_lane_line.allx, left_lane_line.ally, right_lane_line.allx, right_lane_line.ally)
@@ -170,51 +182,16 @@ def process_frame(frame_image):
             global new_calc_frames
             new_calc_frames += 1
 
-            # 4) Identify lane pixels
-            leftx, lefty, rightx, righty = helpers.find_pixels_by_histogram(transformed_img)
-            # 5) Calculate curvature
-            colored_transformed_img, left_line_values, right_line_values = helpers.calc_curvature(transformed_img, leftx, lefty, rightx, righty)
-
-            # Check if new curvature makes sense
-            prior_lane_radius = helpers.get_lane_curvature(left_lane_line, right_lane_line)
-            new_lane_radius = np.mean((left_line_values[2], right_line_values[2]))
-            if (sanity_check(left_line_values, right_line_values)): 
-                left_lane_line.update_pixel_values(leftx, lefty, left_line_values[3], left_line_values[1])
-                left_lane_line.set_current_fit(left_line_values[0])
-                left_lane_line.set_recent_fit(left_line_values[0])
-                left_lane_line.set_current_radius(left_line_values[2])
-                left_lane_line.set_recent_radius(left_line_values[2])
-
-                right_lane_line.update_pixel_values(rightx, righty, right_line_values[3], right_line_values[1])
-                right_lane_line.set_current_fit(right_line_values[0])
-                right_lane_line.set_recent_fit(right_line_values[0])
-                right_lane_line.set_current_radius(right_line_values[2])
-                right_lane_line.set_recent_radius(right_line_values[2])
-                
-                frame_fails = 0
-                left_lane_line.detected = True
-                right_lane_line.detected = True
-            else:
-                frame_fails += 1
+            # 7) Save lane line data
+            save_new_line_data(
+            LineData(leftx, lefty, left_line_values[3], left_line_values[1], left_line_values[0], left_line_values[0], left_line_values[2], left_line_values[2]),
+            LineData(rightx, righty, right_line_values[3], right_line_values[1], right_line_values[0], right_line_values[0], right_line_values[2], right_line_values[2])
+            )
 
         else:
-            # 7) Update lane line data
-            left_lane_line.update_pixel_values(leftx, lefty, left_line_values[3], left_line_values[1])
-
-            left_lane_line.set_recent_fit(left_lane_line.current_fit)
-            left_lane_line.set_current_fit(left_line_values[0])
-            left_lane_line.set_recent_radius(np.mean((left_lane_line.radius_of_curvature, left_lane_line.recent_radius)))
-            left_lane_line.set_current_radius(np.mean((left_line_values[2], left_lane_line.recent_radius)))
+            # if not, try next frame
+            frame_fails += 1
         
-            right_lane_line.update_pixel_values(rightx, righty, right_line_values[3], right_line_values[1])
-            right_lane_line.set_recent_fit(right_lane_line.current_fit)
-            right_lane_line.set_current_fit(right_line_values[0])
-            right_lane_line.set_recent_radius(np.mean((right_lane_line.radius_of_curvature, right_lane_line.recent_radius)))
-            right_lane_line.set_current_radius(np.mean((right_line_values[2], right_lane_line.recent_radius)))
-        
-            frame_fails = 0
-            left_lane_line.detected = True
-            right_lane_line.detected = True
     else:
         # 4) Identify lane pixels
         leftx, lefty, rightx, righty = helpers.find_pixels_by_prior(transformed_img, left_lane_line.allx, left_lane_line.ally, right_lane_line.allx, right_lane_line.ally)
@@ -226,19 +203,11 @@ def process_frame(frame_image):
             right_lane_line.detected = False
             frame_fails += 1
         else:
-            # 6) Update lane line data
-            left_lane_line.update_pixel_values(leftx, lefty, left_line_values[3], left_line_values[1])
-
-            left_lane_line.set_recent_fit(left_lane_line.current_fit)
-            left_lane_line.set_current_fit(left_line_values[0])
-            left_lane_line.set_recent_radius(np.mean((left_lane_line.radius_of_curvature, left_lane_line.recent_radius)))
-            left_lane_line.set_current_radius(np.mean((left_line_values[2], left_lane_line.recent_radius)))
-        
-            right_lane_line.update_pixel_values(rightx, righty, right_line_values[3], right_line_values[1])
-            right_lane_line.set_recent_fit(right_lane_line.current_fit)
-            right_lane_line.set_current_fit(right_line_values[0])
-            right_lane_line.set_recent_radius(np.mean((right_lane_line.radius_of_curvature, right_lane_line.recent_radius)))
-            right_lane_line.set_current_radius(np.mean((right_line_values[2], right_lane_line.recent_radius)))
+            # 7) Update lane line data
+            save_new_line_data(
+            LineData(leftx, lefty, left_line_values[3], left_line_values[1], left_lane_line.current_fit, left_line_values[0], np.mean((left_lane_line.radius_of_curvature, left_lane_line.recent_radius)), np.mean((left_line_values[2], left_lane_line.recent_radius))),
+            LineData(rightx, righty, right_line_values[3], right_line_values[1], right_lane_line.current_fit, right_line_values[0], np.mean((right_lane_line.radius_of_curvature, right_lane_line.recent_radius)), np.mean((right_line_values[2], right_lane_line.recent_radius)))
+            )
 
     # 7) Warp back results
     #print("l: " + str(left_lane_line.radius_of_curvature) + "; r: " + str(right_lane_line.radius_of_curvature) + "; c: " +  str(np.mean((left_lane_line.radius_of_curvature, right_lane_line.radius_of_curvature))))
