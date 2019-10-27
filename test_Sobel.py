@@ -61,7 +61,7 @@ def dir_threshold(image, sobel_kernel=3, thresh=(0, np.pi/2)):
     dir_binary[(direction > thresh[0]) & (direction < thresh[1])] = 1
     return dir_binary
 
-image = mpimg.imread("test_images/test10.jpg")
+image = mpimg.imread("test_images/test14.jpg")
 
 # Choose a Sobel kernel size
 ksize = 3 # Choose a larger odd number to smooth gradient measurements
@@ -101,8 +101,8 @@ v_threshold = (v > lower_v_threshold) & (v <= upper_v_threshold)
 color_based_threshold = s_threshold & (white_mask | yellow_mask)
 
 combined = np.zeros_like(dir_binary)
-combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) | color_based_threshold] = 1
-#combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
+#combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) | color_based_threshold] = 1
+combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
 #combined[((grady == 1) & (gradx == 1))] = 1
 #combined[((mag_binary == 1))] = 1
 #combined[((mag_binary == 1) & (dir_binary == 1))] = 1
