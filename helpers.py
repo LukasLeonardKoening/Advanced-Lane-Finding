@@ -7,7 +7,7 @@ import glob
 import helpers
 
 # Meters per pixel
-ym_per_pix = 22/720
+ym_per_pix = 24/720
 xm_per_pix = 3.7/990
 
 def calibrateCamera():
@@ -187,7 +187,8 @@ def transform_road(binary_image):
     ysize = binary_image.shape[0]
 
     # Select source points
-    src = np.float32([[554, 465], [735, 465], [90, ysize], [xsize, ysize]])
+    #src = np.float32([[554, 465], [735, 465], [90, ysize], [xsize, ysize]])
+    src = np.float32([[565, 460], [725, 460], [90, ysize], [xsize, ysize]])
 
     # Select destination points
     dest = np.float32([[0,0],[xsize,0],[0, ysize],[xsize,ysize]])
