@@ -55,7 +55,7 @@ left_lane_line = Line()
 right_lane_line = Line()
 new_calc_frames = 0
 frame_fails = 0
-curvature_tolerance = 200
+curvature_tolerance = 300
 
 # Camera calibration
 op, ip = helpers.calibrateCamera()
