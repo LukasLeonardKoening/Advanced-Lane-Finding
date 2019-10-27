@@ -19,7 +19,7 @@ class Line():
         # last coefficients 
         self.recent_coeff = []
         #polynomial coefficients for the most recent fit
-        self.current_fit = []#[np.array([False])]  
+        self.current_fit = [] 
         #radius of curvature of the line in meters
         self.radius_of_curvature = None 
         # recent optimal radius value over last n frames
@@ -80,7 +80,6 @@ def sanity_check(left_line_values, right_line_values):
 
 def process_frame(frame_image):
     global frame_fails
-
     # 1) Undistort
     undistort_img = helpers.undistortImage(frame_image, op, ip)
     # 2) Threshold
