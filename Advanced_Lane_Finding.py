@@ -178,15 +178,17 @@ def process_frame(frame_image):
             LineData(rightx, righty, right_line_values[3], right_line_values[1], right_line_values[0], right_line_values[0], right_radius, right_radius)
             )
 
+    elif (left_lane_line.detected == False or right_lane_line.detected == False) and frame_fails > 3:
         # if not and prior frames failed, calculate it by histogram peak analysis
 
-    elif (left_lane_line.detected == False or right_lane_line.detected == False) and frame_fails > 10:
         # 4) Identify lane pixels
-        leftx, lefty, rightx, righty = helpers.find_pixels_by_prior(transformed_img, left_lane_line.allx, left_lane_line.ally, right_lane_line.allx, right_lane_line.ally)
+        leftx, lefty, rightx, righty = helpers.find_pixels_by_histogram(transformed_img)
         # 5) Calculate curvature
         colored_transformed_img, left_line_values, right_line_values = helpers.calc_curvature(transformed_img, leftx, lefty, rightx, righty)
-        # 6) Sanity checks
-        if (sanity_check(left_line_values, right_line_values)):
+
+        # 6) Sanity check if new curvature makes sense
+        if new_calc_test(left_line_values, right_line_values): 
+            # For statistics
             global new_calc_frames
             new_calc_frames += 1
 
@@ -196,6 +198,7 @@ def process_frame(frame_image):
             LineData(rightx, righty, right_line_values[3], right_line_values[1], right_line_values[0], right_line_values[0], right_line_values[2], right_line_values[2])
             )
 
+            frame_fails = 0
         else:
             # if not, try next frame
             frame_fails += 1
@@ -208,7 +211,7 @@ def process_frame(frame_image):
         # 5) Calculate curvature
         colored_transformed_img, left_line_values, right_line_values = helpers.calc_curvature(transformed_img, leftx, lefty, rightx, righty)
         # 6) Sanity checks
-        if (sanity_check(left_line_values, right_line_values)):
+        if (not sanity_check(left_line_values, right_line_values)):
             left_lane_line.detected = False
             right_lane_line.detected = False
             frame_fails += 1
