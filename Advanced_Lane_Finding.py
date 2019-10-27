@@ -229,9 +229,9 @@ def process_frame(frame_image):
 def test_video_with_prior():
     ## Video
     output = 'output_videos/project.mp4'
-    clip = VideoFileClip("test_videos/project_video.mp4").subclip(15, 30)
+    clip = VideoFileClip("test_videos/project_video.mp4")
     processed_clip = clip.fl_image(process_frame)
     processed_clip.write_videofile(output, audio=False)
-    print("New calculated frames: " + str(new_calc_frames))
+    print("Totally new calculated frames: " + str(new_calc_frames))
 
 test_video_with_prior()
