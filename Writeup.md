@@ -141,7 +141,7 @@ The `helpers.find_pixels_by_histogram()` returns the resulting left x and y pixe
 After collecting the needed pixels the both functions `helpers.fit_poly()` (lines 271-278) and `helpers.fit_poly_pixel()` (lines 280-287) can now calculate the 2nd order polynomial just by calling the Numpy function `np.polyfit()` function. Both fit_poly functions return the parameters for the 2nd order polynomial for both lane lines. In the `helpers.fit_poly()` function I also considered the conversion from pixel to meters.
 
 The visualized result of the functions could look like this:
-![](output_images/identified_image_with_poly.jpg)
+![](output_images/identified_image_with_poly.png)
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
