@@ -31,7 +31,7 @@ In the function `helpers.calibrateCamera()` itself (lines 13-48) I first read in
 For distortion correction I implemented a separate function called `helpers.undistortImage()` (lines 50-67) that takes in an distorted image and the `obj_points` and `img_points` from the `helpers.calibrateCamera()` function, and returns an distortion corrected image. It should be mentioned, that the distorted image must been take by the same camera as the calibration images. To calculate the camera matrix and the distortion coefficients I used the OpenCV function `cv2.calibrateCamera()` (line 61) and then correct the distortion with the OpenCV function `cv2.undistort()` (line 64). 
 
 An result from these two functions could look like this:
-![](Project%202%20-%20Advanced%20Lane%20Finding/Photo%2029.%20Oct%202019%20at%20103155.jpg)
+![](output_images/calibration_image.jpg)
 
 ### 2.2 - Pipeline (single images)
 
