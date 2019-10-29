@@ -39,9 +39,9 @@ An result from these two functions could look like this:
 
 To demonstrate the distortion correction, I provide an distortion-corrected test image (Image 2):
 
-![](Project%202%20-%20Advanced%20Lane%20Finding/Photo%2028.%20Oct%202019%20at%20201111.jpg)
+![](output_images/original_image.jpg)
 Image 1 - Original
-![](Project%202%20-%20Advanced%20Lane%20Finding/Photo%2028.%20Oct%202019%20at%20201059.jpg)
+![](output_images/undistorted_image.jpg)
 Image 2 - Distortion-corrected image
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
@@ -96,7 +96,7 @@ I used following threshold values (obtained by testing):
 
 The binary OR combination of color based threshold, absolute gradient threshold and magnitude-direction threshold form the thresholded binary image (lines 173-175, `helpers.py`). An example is provided below:
 
-![](Project%202%20-%20Advanced%20Lane%20Finding/Photo%2028.%20Oct%202019%20at%20220000.jpg)
+![](output_images/thresholded_image.jpg)
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
@@ -116,12 +116,12 @@ I verified the points by drawing lines connecting the points and checking parall
 
 To calculate the transformation matrix and the inverse matrix I used the OpenCV function `cv2.getPerspectiveTransform()` (lines 197 & 198). 
 In order to apply the transformation I used the `cv2.warpPerspective()` function which returns the warped image. An example output you can see bellow:
-![](Project%202%20-%20Advanced%20Lane%20Finding/Photo%2028.%20Oct%202019%20at%20224031.jpg)
+![](output_images/transformed_image.jpg)
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
 To identify lane-line pixels I made two different approaches. If there is a-priori data from prior frames the next lane lines will be searched within the prior polynomial fit as implemented in the `helpers.find_pixels_by_prior()` function (lines 289-317). If not, the pixels have to be found by another approach. I chose the histogram analysis technique in the `helpers.find_pixels_by_histogram()` function (lines 203-269). Bellow you can see the histogram of the lowest 10th of the image:
-![](Project%202%20-%20Advanced%20Lane%20Finding/Photo%2028.%20Oct%202019%20at%20225509.jpg)
+![](output_images/histogram.png)
 
 There are two significant spikes which probably represent the lane lines in this  10th of the image. After choosing the maximal value of the left and right half and selecting all nonzero pixels within a margin (100 pixels) left and right, I checked if there are enough pixels (`minpx = 50`): 
 ```Python
@@ -141,7 +141,7 @@ The `helpers.find_pixels_by_histogram()` returns the resulting left x and y pixe
 After collecting the needed pixels the both functions `helpers.fit_poly()` (lines 271-278) and `helpers.fit_poly_pixel()` (lines 280-287) can now calculate the 2nd order polynomial just by calling the Numpy function `np.polyfit()` function. Both fit_poly functions return the parameters for the 2nd order polynomial for both lane lines. In the `helpers.fit_poly()` function I also considered the conversion from pixel to meters.
 
 The visualized result of the functions could look like this:
-![](Project%202%20-%20Advanced%20Lane%20Finding/Photo%2028.%20Oct%202019%20at%20233201.jpg)
+![](output_images/identified_image_with_poly.jpg)
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
@@ -174,7 +174,7 @@ car_offset = car_center - (lane_center_x)
 
 I implemented this step in the `helpers.warp_back_results()` function (lines 371-416). This function also takes as input in inverse matrix calculated earlier on. Here is an example of my result on a test image:
 
-![](Project%202%20-%20Advanced%20Lane%20Finding/Photo%2028.%20Oct%202019%20at%20235712.jpg)
+![](output_images/final_image.jpg)
 
 - - - -
 
