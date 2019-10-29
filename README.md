@@ -182,7 +182,7 @@ I implemented this step in the `helpers.warp_back_results()` function (lines 371
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](https://www.dropbox.com/s/uth92hvux5ga6ys/project_done.mp4?dl=0). You can also find it as `project_done.mp4` in the output_videos folder.
+Here's a [link to my video result](output_videos/project_done.mp4).
 
 - - - -
 
